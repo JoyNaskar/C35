@@ -1,59 +1,83 @@
-var hypnoticBall, database;
-var position;
+var balloon,balloonImage1,balloonImage2;
+var database;
+var height;
 
+function preload(){
+  bg =loadImage("Images/cityImage.png");
+     balloonImage1=loadAnimation("Images/HotAirBallon-01.png");
+   balloonImage2=loadAnimation("Images/HotAirBallon-01.png","Images/HotAirBallon-01.png",
+   "Images/HotAirBallon-01.png","Images/HotAirBallon-02.png","Images/HotAirBallon-02.png",
+   "Images/HotAirBallon-02.png","Images/HotAirBallon-03.png","Images/HotAirBallon-03.png","Images/HotAirBallon-03.png");
+   
+ 
+ 
+  }
 
+//Function to set initial environment
+function setup() {
+  database=firebase.database();
+  createCanvas(1270,600);
 
+  balloon=createSprite(250,650,150,150);
+  balloon.addAnimation("hotAirBalloon",balloonImage1);
+  balloon.scale=0.5;
 
-function setup(){
-    
-    database = firebase.database();
-
-    
-    createCanvas(500,500);
-    hypnoticBall = createSprite(250,250,10,10);
-    hypnoticBall.shapeColor = "red";
-    
-    var hypnoticBallPosition = database.ref('ball/position');  
-    hypnoticBallPosition.on("value", readPosition, showError)
-
+  var balloonHeight=database.ref('balloon/height');
+  balloonHeight.on("value",readHeight, showError);
+  textSize(20); 
 }
 
-function draw(){
-    background("white");
-    if(keyDown(LEFT_ARROW)){
-        writePosition(-1,0);
-    }
-    else if(keyDown(RIGHT_ARROW)){
-        writePosition(1,0);
-    }
-    else if(keyDown(UP_ARROW)){
-        writePosition(0,-1);
-    }
-    else if(keyDown(DOWN_ARROW)){
-        writePosition(0,+1);
-    }
-    drawSprites();
+// function to display UI
+function draw() {
+  background(bg);
+
+  if(keyDown(LEFT_ARROW)){
+    updateHeight(-10,0);
+    balloon.addAnimation("hotAirBalloon",balloonImage2);
+  }
+  else if(keyDown(RIGHT_ARROW)){
+    updateHeight(10,0);
+    balloon.addAnimation("hotAirBalloon",balloonImage2);
+  }
+  else if(keyDown(UP_ARROW)){
+    updateHeight(0,-10);
+    balloon.addAnimation("hotAirBalloon",balloonImage2);
+    balloon.scale=balloon.scale -0.005;
+  }
+  else if(keyDown(DOWN_ARROW)){
+    updateHeight(0,+10);
+    balloon.addAnimation("hotAirBalloon",balloonImage2);
+    balloon.scale=balloon.scale+0.005;
+  }
+
+  drawSprites();
+  fill(0);
+  stroke("white");
+  textSize(25);
+  text("Use arrow keys to move Hot Air Balloon!",30,60);
+
+  fill(0);
+  stroke("white");
+  textSize(20);
+  text("Hello! I am Joy, Your Helper!!",30,30);
 }
 
-function writePosition(x,y){
-database.ref('ball/position').set({
-    'x': position.x + x,
-    'y' :position.y + y,
 
-})
+
+function updateHeight(x,y){
+  database.ref('balloon/height').set({
+    'x': height.x + x ,
+    'y': height.y + y
+  })
 }
 
-function readPosition(data)
-{
-    position = data.val();
-    hypnoticBall.x = position.x;
-    hypnoticBall.y = position.y;
-
+function readHeight(data){
+  height = data.val();
+  console.log(height.x);
+  balloon.x = height.x;
+  balloon.y = height.y;
 }
 
-
- function showError()
- {
-    console.log("Error in writing to the database")
-
- }
+function showError(){
+  console.log("Error in writing to the database");
+}
